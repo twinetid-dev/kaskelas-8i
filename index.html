@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KasKelas 8i</title>
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --bg-color: #f0fdfa;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    body { 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      font-size: 17px; 
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .app-container { 
+      width: 100%; 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      background: var(--card-bg); 
+      min-height: 100vh; 
+      padding: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      position: relative; 
+    }
+
+    @media (min-width: 768px) {
+      body { padding: 24px; font-size: 18px; }
+      .app-container { 
+        min-height: 94vh; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 30px rgba(13, 148, 136, 0.12); 
+        padding: 28px; 
+      }
+    }
+    
+    .page { display: none; flex: 1; flex-direction: column; }
+    .page.active { display: flex; }
+
+    .login-box { margin: auto 0; text-align: center; max-width: 440px; margin-left: auto; margin-right: auto; width: 100%; padding: 20px 0; }
+    .login-icon { width: 88px; height: 88px; background: var(--bg-color); color: var(--primary); font-size: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-weight: bold; border: 3px solid var(--primary); }
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-group label { display: block; font-size: 15px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 16px; font-weight: 500; outline: none; transition: border 0.2s; background: #fff; color: var(--text-main); }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo { width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; }
+    .brand h1 { font-size: 22px; font-weight: 800; color: var(--text-main); }
+    .brand p { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+    .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background 0.2s; width: 100%; text-align: center; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-sm { padding: 10px 18px; font-size: 15px; width: auto; }
+    .btn-outline { background: white; border: 2px solid #cbd5e1; color: var(--text-muted); }
+    .btn-outline:hover { background: #f8fafc; color: var(--text-main); }
+
+    .btn-action-container { display: inline-flex; align-items: center; gap: 6px; }
+    .btn-edit-sm { padding: 4px 10px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; background-color: #ffffff; color: var(--text-main); border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+    .btn-edit-sm:hover { background-color: #f1f5f9; }
+    .btn-delete-sm { width: 28px; height: 28px; min-width: 28px; padding: 0; border: 1px solid #fecaca; background-color: #fee2e2; color: #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
+    .btn-delete-sm:hover { background-color: #fca5a5; }
+    .btn-delete-sm svg { width: 15px; height: 15px; pointer-events: none; }
+
+    .card-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 22px; display: flex; align-items: center; gap: 18px; }
+    .card-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #ccfbf1; color: var(--primary); flex-shrink: 0; }
+    .card p { font-size: 15px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .card h2 { font-size: 24px; font-weight: 800; color: var(--text-main); }
+
+    .tabs { display: flex; gap: 16px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; overflow-x: auto; padding-bottom: 2px; }
+    .tab-item { padding-bottom: 10px; font-size: 17px; font-weight: 700; color: var(--text-muted); cursor: pointer; background: none; border: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .tab-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+    .tab-content { display: none; flex: 1; flex-direction: column; }
+    .tab-content.active { display: flex; }
+
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .section-header h3 { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .section-header p { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+
+    .table-container { background: white; border: 2px solid #e2e8f0; border-radius: 14px; overflow-x: auto; max-height: 400px; overflow-y: auto; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 16px; }
+    th { background: #f8fafc; color: var(--text-muted); padding: 16px; font-weight: 700; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 2; }
+    td { padding: 16px; color: var(--text-main); font-weight: 500; border-bottom: 1px solid #f1f5f9; }
+    .empty-row { text-align: center; color: var(--text-muted); padding: 35px; font-size: 16px; font-weight: 600; }
+
+    .laporan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    .modal.active { display: flex; }
+    
+    .modal-content { 
+      background: white; 
+      width: 100%; 
+      max-width: 500px; 
+      max-height: 90vh; 
+      border-radius: 20px; 
+      padding: 20px 24px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25); 
+      display: flex; 
+      flex-direction: column; 
+      overflow-y: auto;
+    }
+    
+    .modal-content h3 { font-size: 20px; margin-bottom: 12px; color: var(--text-main); font-weight: 800; }
+    
+    .modal-body { 
+      overflow-y: auto; 
+      max-height: 140px; 
+      border: 2px solid #cbd5e1; 
+      border-radius: 12px; 
+      padding: 8px; 
+      margin-bottom: 10px; 
+      background: #fafafa;
+    }
+    
+    .checkbox-item { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+    .checkbox-item:hover { background: #f0fdfa; border-radius: 8px; }
+    .checkbox-item input { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+
+    @media print {
+      body { background: white; padding: 0; font-size: 14px; }
+      .app-container { box-shadow: none; border: none; max-width: 100%; min-height: auto; padding: 0; }
+      header, .card-list, .tabs, .btn, .modal, .no-print { display: none !important; }
+      .page { display: none !important; }
+      #page-dashboard { display: block !important; }
+      #tab-laporan { display: block !important; }
+      .laporan-card-print { border: 2px solid #0d9488 !important; background: white !important; padding: 20px !important; margin-bottom: 20px !important; border-radius: 12px; page-break-inside: avoid; }
+      .table-container { max-height: none !important; overflow: visible !important; border: none !important; }
+      table { font-size: 14px !important; }
+      th { background: #f1f5f9 !important; color: #000 !important; border-bottom: 2px solid #cbd5e1 !important; }
+      td { border-bottom: 1px solid #e2e8f0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- HALAMAN LOGIN -->
+    <div id="page-login" class="page active">
+      <div class="login-box">
+        <div class="login-icon">8i</div>
+        <h2 style="font-size: 28px; margin-bottom: 8px; color: #115e59; font-weight: 800;">KasKelas 8i</h2>
+        <p style="font-size: 16px; font-weight: 600; color: var(--text-muted); margin-bottom: 28px;">Silakan masuk untuk melanjutkan</p>
+        
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="admin / siswa" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn" id="btnLogin" style="margin-top: 10px;">Masuk</button>
+          <p id="loginError" style="color: #dc2626; font-size: 15px; font-weight: 700; margin-top: 12px; display: none;"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- HALAMAN DASHBOARD -->
+    <div id="page-dashboard" class="page">
+      <header>
+        <div class="brand">
+          <div class="brand-logo">8i</div>
+          <div>
+            <h1 id="userTitle">KasKelas 8i</h1>
+            <p id="userRoleText">Dashboard</p>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="logout()">Keluar</button>
+      </header>
+
+      <div class="card-list">
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <div>
+            <p>Saldo Kas</p>
+            <h2 id="val-saldo">Rp 0</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <div>
+            <p>Pemasukan Keseluruhan</p>
+            <h2 id="val-pemasukan">Rp 0</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fee2e2; color:#dc2626;">📉</div>
+          <div>
+            <p>Pengeluaran</p>
+            <h2 id="val-pengeluaran">Rp 0</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-item active" onclick="switchTab(this, 'tab-pemasukan')">Pemasukan</button>
+        <button class="tab-item" onclick="switchTab(this, 'tab-pengeluaran')">Pengeluaran</button>
+        <button class="tab-item" onclick="switchTab(this, 'tab-siswa')">Siswa</button>
+        <button class="tab-item" onclick="switchTab(this, 'tab-laporan')">Laporan</button>
+      </div>
+
+      <!-- TAB PEMASUKAN -->
+      <div id="tab-pemasukan" class="tab-content active">
+        <div class="section-header">
+          <div>
+            <h3>Pemasukan Kas</h3>
+            <p>Catat setoran & riwayat pembayaran.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;" id="adminPemasukanActions">
+            <button class="btn btn-sm btn-outline" onclick="downloadTemplateCSV()">Template CSV</button>
+            <button class="btn btn-sm btn-outline" onclick="triggerImportCSV()">Import CSV</button>
+            <button class="btn btn-sm" id="btnInputPemasukan" onclick="toggleModalPemasukan(true)">+ Input</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Siswa</th>
+                <th>Periode</th>
+                <th>Minggu</th>
+                <th>Nominal</th>
+                <th id="thAksiPemasukan" style="text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-pemasukan-body">
+              <tr><td colspan="6" class="empty-row">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB PENGELUARAN -->
+      <div id="tab-pengeluaran" class="tab-content">
+        <div class="section-header">
+          <div>
+            <h3>Daftar Pengeluaran</h3>
+            <p>Catatan pengeluaran kas kelas.</p>
+          </div>
+          <button class="btn btn-sm" id="btnInputPengeluaran" onclick="toggleModalPengeluaran(true)">+ Input</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Nominal</th>
+                <th id="thAksiPengeluaran" style="text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-pengeluaran-body">
+              <tr><td colspan="4" class="empty-row">Belum ada pengeluaran</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB SISWA -->
+      <div id="tab-siswa" class="tab-content">
+        <div class="section-header">
+          <div>
+            <h3>Daftar Siswa Kelas 8i</h3>
+            <p>Data siswa dari database.</p>
+          </div>
+          <button class="btn btn-sm" id="btnInputSiswa" onclick="toggleModalSiswa(true)">+ Siswa</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">No</th>
+                <th>Nama Siswa</th>
+                <th style="width: 100px;">L/P</th>
+              </tr>
+            </thead>
+            <tbody id="table-siswa-body">
+              <tr><td colspan="3" class="empty-row">Memuat data siswa...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB LAPORAN -->
+      <div id="tab-laporan" class="tab-content" style="gap: 20px; overflow-y: auto;">
+        <div class="laporan-grid">
+          <div id="section-laporan-ringkasan" class="laporan-card-print" style="background: #f8fafc; padding: 22px; border-radius: 16px; border: 2px solid #e2e8f0; font-size: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+              <div>
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Laporan Keuangan Kas</h3>
+                <p style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Ringkasan keseluruhan kas kelas.</p>
+              </div>
+              <button class="btn btn-sm btn-outline no-print" onclick="cetakRingkasan()">Cetak</button>
+            </div>
+            <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 8px 0;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Nama Kelas</span>
+              <strong style="font-weight: 700;">Kelas 8i</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Total Pemasukan</span>
+              <strong id="rep-total-pemasukan" style="color: #0d9488; font-weight: 700;">Rp 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Total Pengeluaran</span>
+              <strong id="rep-total-pengeluaran" style="color: #dc2626; font-weight: 700;">Rp 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Saldo Akhir Kas</span>
+              <strong id="rep-saldo" style="font-size: 20px; color: #0f766e; font-weight: 800;">Rp 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 4px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Akses Pengguna</span>
+              <span id="laporanRole" style="font-weight: 700;">-</span>
+            </div>
+          </div>
+
+          <div id="section-laporan-periode" class="laporan-card-print" style="background: #f8fafc; padding: 22px; border-radius: 16px; border: 2px solid #e2e8f0; font-size: 16px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Laporan Kas per Periode</h3>
+                <p style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Cek status pembayaran siswa.</p>
+              </div>
+              <button class="btn btn-sm btn-outline no-print" onclick="cetakPeriode()">Cetak</button>
+            </div>
+            <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 2px 0;">
+            
+            <div style="display: flex; gap: 12px;" class="no-print">
+              <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                <label>Pilih Periode</label>
+                <select id="filterPeriode" onchange="loadLaporanPeriode()"></select>
+              </div>
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label>Minggu Ke</label>
+                <select id="filterMinggu" onchange="loadLaporanPeriode()">
+                  <option value="1">Minggu 1</option>
+                  <option value="2">Minggu 2</option>
+                  <option value="3">Minggu 3</option>
+                  <option value="4">Minggu 4</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-container" style="max-height: 260px; margin-top: 4px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">No</th>
+                    <th>Nama Siswa</th>
+                    <th>Status</th>
+                    <th>Tanggal Bayar</th>
+                  </tr>
+                </thead>
+                <tbody id="table-laporan-periode-body">
+                  <tr><td colspan="4" class="empty-row">Memuat data laporan...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL INPUT PEMASUKAN -->
+  <div id="inputModal" class="modal">
+    <div class="modal-content">
+      <h3>Tambah Pemasukan Kas</h3>
+      <form id="formPemasukan" onsubmit="submitPemasukan(event)">
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="inTanggal" required>
+        </div>
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="margin-bottom:0;">Pilih Siswa</label>
+            <button type="button" class="btn btn-outline" style="font-size: 13px; font-weight: 700; padding: 4px 10px; width: auto;" onclick="toggleSelectAll(this)">Pilih Semua</button>
+          </div>
+          <div class="modal-body" id="listSiswaCheckbox">
+            <span style="font-size: 15px; font-weight: 600; color: #475569;">Memuat daftar siswa...</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Periode (Bulan Pembayaran)</label>
+          <select id="inPeriode"></select>
+        </div>
+        <div class="form-group">
+          <label>Minggu Ke-</label>
+          <select id="inMinggu">
+            <option value="1">Minggu 1</option>
+            <option value="2">Minggu 2</option>
+            <option value="3">Minggu 3</option>
+            <option value="4">Minggu 4</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nominal per Siswa (Rp)</label>
+          <select id="selectNominal" onchange="handleNominalChange(this)">
+            <option value="5000" selected>Rp 5.000</option>
+            <option value="10000">Rp 10.000</option>
+            <option value="15000">Rp 15.000</option>
+            <option value="20000">Rp 20.000</option>
+            <option value="lainnya">Lainnya (Manual)</option>
+          </select>
+        </div>
+        <div class="form-group" id="groupNominalManual" style="display: none;">
+          <label>Masukkan Nominal Manual (Rp)</label>
+          <input type="number" id="inNominalManual" placeholder="Contoh: 7000">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleModalPemasukan(false)">Batal</button>
+          <button type="submit" class="btn btn-sm" id="btnSimpan">Simpan Semua</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL INPUT PENGELUARAN -->
+  <div id="inputModalPengeluaran" class="modal">
+    <div class="modal-content">
+      <h3>Tambah Pengeluaran Kas</h3>
+      <form id="formPengeluaran" onsubmit="submitPengeluaran(event)">
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="outTanggal" required>
+        </div>
+        <div class="form-group">
+          <label>Keterangan / Keperluan</label>
+          <textarea id="outKeterangan" rows="3" placeholder="Contoh: Membeli spidol dan penghapus" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Nominal Pengeluaran (Rp)</label>
+          <input type="number" id="outNominal" placeholder="Contoh: 25000" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleModalPengeluaran(false)">Batal</button>
+          <button type="submit" class="btn btn-sm" id="btnSimpanPengeluaran">Simpan Pengeluaran</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH SISWA -->
+  <div id="inputModalSiswa" class="modal">
+    <div class="modal-content">
+      <h3>Tambah Siswa Baru</h3>
+      <form id="formSiswa" onsubmit="submitSiswa(event)">
+        <div class="form-group">
+          <label>Nomor Absen / No</label>
+          <input type="number" id="siswaNo" placeholder="Contoh: 1" required>
+        </div>
+        <div class="form-group">
+          <label>Nama Lengkap Siswa</label>
+          <input type="text" id="siswaNama" placeholder="Contoh: Ahmad Fauzi" required>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin (L / P)</label>
+          <select id="siswaGender">
+            <option value="L">Laki-laki (L)</option>
+            <option value="P">Perempuan (P)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleModalSiswa(false)">Batal</button>
+          <button type="submit" class="btn btn-sm" id="btnSimpanSiswa">Simpan Siswa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Konfigurasi Supabase Anda (Ganti dengan URL & Anon Key project Anda)
+    const SUPABASE_URL = 'https://tffihlopqgduzybxdilk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmZmlobG9wcWdkdXp5YnhkaWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMTY4NDYsImV4cCI6MjEwMzc5Mjg0Nn0.XBuJ-K18_yNxipD5MfnxRUu0tHsqPj_3X67BwvKRZ3Y';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let globalSiswaList = [];
+    let globalPemasukanList = [];
+    let globalPengeluaranList = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      generatePeriodeOptions();
+      const savedRole = localStorage.getItem('kas_role');
+      if (savedRole) {
+        document.getElementById('page-login').classList.remove('active');
+        document.getElementById('page-dashboard').classList.add('active');
+        setupDashboard(savedRole);
+        loadData();
+      }
+    });
+
+    function setupDashboard(role) {
+      document.getElementById('userRoleText').innerText = 'Login sebagai: ' + role.toUpperCase();
+      document.getElementById('laporanRole').innerText = role.toUpperCase();
+
+      const actionDiv = document.getElementById('adminPemasukanActions');
+      const thAksi = document.getElementById('thAksiPemasukan');
+      const thAksiPengeluaran = document.getElementById('thAksiPengeluaran');
+
+      if (role !== 'admin') {
+        document.getElementById('btnInputPemasukan').style.display = 'none';
+        document.getElementById('btnInputPengeluaran').style.display = 'none';
+        document.getElementById('btnInputSiswa').style.display = 'none';
+        if (actionDiv) actionDiv.style.display = 'none';
+        if (thAksi) thAksi.style.display = 'none';
+        if (thAksiPengeluaran) thAksiPengeluaran.style.display = 'none';
+      } else {
+        document.getElementById('btnInputPemasukan').style.display = '';
+        document.getElementById('btnInputPengeluaran').style.display = '';
+        document.getElementById('btnInputSiswa').style.display = '';
+        if (actionDiv) actionDiv.style.display = 'flex';
+        if (thAksi) thAksi.style.display = '';
+        if (thAksiPengeluaran) thAksiPengeluaran.style.display = '';
+      }
+    }
+
+    function generatePeriodeOptions() {
+      const selectIn = document.getElementById('inPeriode');
+      const selectFilter = document.getElementById('filterPeriode');
+      const months = ['Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'];
+      const currentYear = new Date().getFullYear();
+      let optionsHtml = '';
+
+      for (let y = currentYear; y <= currentYear + 2; y++) {
+        months.forEach((m) => {
+          optionsHtml += `<option value="${m} ${y}">${m} ${y}</option>`;
+        });
+      }
+      if (selectIn) selectIn.innerHTML = optionsHtml;
+      if (selectFilter) selectFilter.innerHTML = optionsHtml;
+    }
+
+    function formatRupiah(angka) {
+      return 'Rp ' + Number(angka).toLocaleString('id-ID');
+    }
+
+    function handleNominalChange(selectEl) {
+      const manualGroup = document.getElementById('groupNominalManual');
+      const manualInput = document.getElementById('inNominalManual');
+      if (selectEl.value === 'lainnya') {
+        manualGroup.style.display = 'block';
+        manualInput.required = true;
+        manualInput.focus();
+      } else {
+        manualGroup.style.display = 'none';
+        manualInput.required = false;
+        manualInput.value = '';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const btn = document.getElementById('btnLogin');
+      const err = document.getElementById('loginError');
+
+      btn.innerText = 'Memeriksa...';
+      err.style.display = 'none';
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('username', u)
+          .eq('password', p)
+          .single();
+
+        btn.innerText = 'Masuk';
+        if (error || !data) {
+          err.innerText = 'Username atau password salah!';
+          err.style.display = 'block';
+        } else {
+          localStorage.setItem('kas_role', data.role);
+          document.getElementById('page-login').classList.remove('active');
+          document.getElementById('page-dashboard').classList.add('active');
+          setupDashboard(data.role);
+          loadData();
+        }
+      } catch (errObj) {
+        btn.innerText = 'Masuk';
+        err.innerText = 'Gagal terhubung ke database Supabase.';
+        err.style.display = 'block';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('kas_role');
+      document.getElementById('page-dashboard').classList.remove('active');
+      document.getElementById('page-login').classList.add('active');
+      document.getElementById('formPemasukan').reset();
+      document.getElementById('formPengeluaran').reset();
+      document.getElementById('formSiswa').reset();
+      document.getElementById('groupNominalManual').style.display = 'none';
+    }
+
+    async function loadData() {
+      generatePeriodeOptions();
+      const isAdmin = (localStorage.getItem('kas_role') === 'admin');
+
+      try {
+        // Fetch Siswa
+        const { data: siswaData } = await supabase.from('siswa').select('*').order('no', { ascending: true });
+        globalSiswaList = siswaData || [];
+
+        // Fetch Pemasukan
+        const { data: pemasukanData } = await supabase.from('pemasukan').select('*').order('tanggal', { ascending: false });
+        globalPemasukanList = pemasukanData || [];
+
+        // Fetch Pengeluaran
+        const { data: pengeluaranData } = await supabase.from('pengeluaran').select('*').order('tanggal', { ascending: false });
+        globalPengeluaranList = pengeluaranData || [];
+
+        // Kalkulasi Total
+        let totalPemasukan = globalPemasukanList.reduce((acc, curr) => acc + Number(curr.nominal), 0);
+        let totalPengeluaran = globalPengeluaranList.reduce((acc, curr) => acc + Number(curr.nominal), 0);
+        let saldoAkhir = totalPemasukan - totalPengeluaran;
+
+        document.getElementById('val-saldo').innerText = formatRupiah(saldoAkhir);
+        document.getElementById('val-pemasukan').innerText = formatRupiah(totalPemasukan);
+        document.getElementById('val-pengeluaran').innerText = formatRupiah(totalPengeluaran);
+
+        document.getElementById('rep-total-pemasukan').innerText = formatRupiah(totalPemasukan);
+        document.getElementById('rep-total-pengeluaran').innerText = formatRupiah(totalPengeluaran);
+        document.getElementById('rep-saldo').innerText = formatRupiah(saldoAkhir);
+
+        // Render Tabel Pemasukan
+        let htmlPemasukan = globalPemasukanList.length === 0 ? `<tr><td colspan="${isAdmin ? 6 : 5}" class="empty-row">Belum ada data pemasukan</td></tr>` :
+          globalPemasukanList.map((row, index) => `
+            <tr>
+              <td>${row.tanggal || '-'}</td>
+              <td>${row.nama_siswa || '-'}</td>
+              <td>${row.periode || '-'}</td>
+              <td>${row.minggu_ke || '-'}</td>
+              <td>${formatRupiah(row.nominal || 0)}</td>
+              ${isAdmin ? `
+                <td style="text-align: center;">
+                  <div class="btn-action-container">
+                    <button class="btn-edit-sm" onclick="openEditPemasukan(${index})">Edit</button>
+                    <button class="btn-delete-sm" onclick="deletePemasukan(${index})" title="Hapus Data">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                  </div>
+                </td>` : ''}
+            </tr>
+          `).join('');
+        document.getElementById('table-pemasukan-body').innerHTML = htmlPemasukan;
+
+        // Render Tabel Pengeluaran
+        let htmlPengeluaran = globalPengeluaranList.length === 0 ? `<tr><td colspan="${isAdmin ? 4 : 3}" class="empty-row">Belum ada pengeluaran</td></tr>` :
+          globalPengeluaranList.map((row, index) => `
+            <tr>
+              <td>${row.tanggal || '-'}</td>
+              <td>${row.keterangan || '-'}</td>
+              <td>${formatRupiah(row.nominal || 0)}</td>
+              ${isAdmin ? `
+                <td style="text-align: center;">
+                  <div class="btn-action-container">
+                    <button class="btn-edit-sm" onclick="openEditPengeluaran(${index})">Edit</button>
+                    <button class="btn-delete-sm" onclick="deletePengeluaran(${index})" title="Hapus Data">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                  </div>
+                </td>` : ''}
+            </tr>
+          `).join('');
+        document.getElementById('table-pengeluaran-body').innerHTML = htmlPengeluaran;
+
+        // Render Tabel Siswa & Checkbox Modal
+        let tableBody = document.getElementById('table-siswa-body');
+        if (globalSiswaList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="3" class="empty-row">Belum ada data siswa</td></tr>';
+        } else {
+          tableBody.innerHTML = globalSiswaList.map(s => `
+            <tr>
+              <td>${s.no || '-'}</td>
+              <td>${s.nama_siswa || '-'}</td>
+              <td>${s.l_p || 'L'}</td>
+            </tr>
+          `).join('');
+        }
+
+        let container = document.getElementById('listSiswaCheckbox');
+        if (globalSiswaList.length === 0) {
+          container.innerHTML = '<span style="font-size: 15px; font-weight: 600; color: #475569;">Belum ada data siswa</span>';
+        } else {
+          container.innerHTML = globalSiswaList.map(s => `
+            <label class="checkbox-item">
+              <input type="checkbox" name="pilihSiswa" value="${s.nama_siswa}">
+              <span>${s.no}. ${s.nama_siswa}</span>
+            </label>
+          `).join('');
+        }
+
+        loadLaporanPeriode();
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+      }
+    }
+
+    async function loadLaporanPeriode() {
+      const periode = document.getElementById('filterPeriode').value;
+      const minggu = Number(document.getElementById('filterMinggu').value);
+      const tbody = document.getElementById('table-laporan-periode-body');
+
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Memuat data...</td></tr>';
+
+      try {
+        const pembayaranFiltered = globalPemasukanList.filter(p => p.periode === periode && Number(p.minggu_ke) === minggu);
+        
+        if (globalSiswaList.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Belum ada data siswa</td></tr>';
+          return;
+        }
+
+        let laporanHtml = globalSiswaList.map(siswa => {
+          const bayar = pembayaranFiltered.find(p => p.nama_siswa === siswa.nama_siswa);
+          const status = bayar ? 'Lunas' : 'Belum Lunas';
+          const tanggal = bayar ? bayar.tanggal : '-';
+
+          return `
+            <tr>
+              <td>${siswa.no}</td>
+              <td>${siswa.nama_siswa}</td>
+              <td>
+                <span style="padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; background: ${status === 'Lunas' ? '#ccfbf1; color: #0f766e;' : '#fee2e2; color: #dc2626;'};">
+                  ${status}
+                </span>
+              </td>
+              <td>${tanggal}</td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.innerHTML = laporanHtml;
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-row" style="color:red;">Gagal memuat laporan</td></tr>`;
+      }
+    }
+
+    async function submitPemasukan(e) {
+      e.preventDefault();
+      const checkedBoxes = document.querySelectorAll('input[name="pilihSiswa"]:checked');
+      let siswaList = Array.from(checkedBoxes).map(cb => cb.value);
+
+      if (siswaList.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan pilih minimal satu siswa!', confirmButtonColor: '#0f766e' });
+        return;
+      }
+
+      const selectVal = document.getElementById('selectNominal').value;
+      let finalNominal = selectVal === 'lainnya' ? document.getElementById('inNominalManual').value : selectVal;
+
+      const tanggal = document.getElementById('inTanggal').value;
+      const periode = document.getElementById('inPeriode').value;
+      const minggu = document.getElementById('inMinggu').value;
+
+      const btn = document.getElementById('btnSimpan');
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      const insertData = siswaList.map(nama => ({
+        tanggal,
+        nama_siswa: nama,
+        periode,
+        minggu_ke: Number(minggu),
+        nominal: Number(finalNominal)
+      }));
+
+      const { error } = await supabase.from('pemasukan').insert(insertData);
+
+      btn.innerText = 'Simpan Semua';
+      btn.disabled = false;
+
+      if (!error) {
+        toggleModalPemasukan(false);
+        loadData();
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Pemasukan berhasil disimpan!', confirmButtonColor: '#0f766e' });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+      }
+    }
+
+    async function submitPengeluaran(e) {
+      e.preventDefault();
+      const tanggal = document.getElementById('outTanggal').value;
+      const keterangan = document.getElementById('outKeterangan').value;
+      const nominal = document.getElementById('outNominal').value;
+
+      const btn = document.getElementById('btnSimpanPengeluaran');
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      const { error } = await supabase.from('pengeluaran').insert([{ tanggal, keterangan, nominal: Number(nominal) }]);
+
+      btn.innerText = 'Simpan Pengeluaran';
+      btn.disabled = false;
+
+      if (!error) {
+        toggleModalPengeluaran(false);
+        loadData();
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Pengeluaran berhasil disimpan!', confirmButtonColor: '#0f766e' });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+      }
+    }
+
+    async function submitSiswa(e) {
+      e.preventDefault();
+      const no = document.getElementById('siswaNo').value;
+      const nama_siswa = document.getElementById('siswaNama').value;
+      const l_p = document.getElementById('siswaGender').value;
+
+      const btn = document.getElementById('btnSimpanSiswa');
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      const { error } = await supabase.from('siswa').insert([{ no: Number(no), nama_siswa, l_p }]);
+
+      btn.innerText = 'Simpan Siswa';
+      btn.disabled = false;
+
+      if (!error) {
+        toggleModalSiswa(false);
+        loadData();
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Siswa berhasil ditambahkan!', confirmButtonColor: '#0f766e' });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+      }
+    }
+
+    async function openEditPemasukan(index) {
+      const row = globalPemasukanList[index];
+      if (!row) return;
+
+      Swal.fire({
+        title: 'Edit Pemasukan Kas',
+        html: `
+          <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Nama Siswa</label><input type="text" value="${row.nama_siswa}" class="swal2-input" style="margin: 0; width: 100%;" disabled></div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Tanggal</label><input type="date" id="swalEditTanggal" value="${row.tanggal}" class="swal2-input" style="margin: 0; width: 100%;"></div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Periode</label><input type="text" id="swalEditPeriode" value="${row.periode}" class="swal2-input" style="margin: 0; width: 100%;"></div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Minggu Ke</label>
+              <select id="swalEditMinggu" class="swal2-select" style="margin: 0; width: 100%; display: block; height: 44px; border-radius: 8px; border: 1px solid #d9d9d9; padding: 0 10px;">
+                <option value="1" ${row.minggu_ke == 1 ? 'selected' : ''}>Minggu 1</option>
+                <option value="2" ${row.minggu_ke == 2 ? 'selected' : ''}>Minggu 2</option>
+                <option value="3" ${row.minggu_ke == 3 ? 'selected' : ''}>Minggu 3</option>
+                <option value="4" ${row.minggu_ke == 4 ? 'selected' : ''}>Minggu 4</option>
+              </select>
+            </div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Nominal (Rp)</label><input type="number" id="swalEditNominal" value="${row.nominal}" class="swal2-input" style="margin: 0; width: 100%;"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan Perubahan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#0f766e',
+        focusConfirm: false,
+        preConfirm: () => ({
+          tanggal: document.getElementById('swalEditTanggal').value,
+          periode: document.getElementById('swalEditPeriode').value,
+          minggu_ke: Number(document.getElementById('swalEditMinggu').value),
+          nominal: Number(document.getElementById('swalEditNominal').value)
+        })
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const { error } = await supabase.from('pemasukan').update(result.value).eq('id', row.id);
+          if (!error) {
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Data diperbarui!', confirmButtonColor: '#0f766e' });
+            loadData();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+          }
+        }
+      });
+    }
+
+    async function deletePemasukan(index) {
+      const row = globalPemasukanList[index];
+      if (!row) return;
+
+      Swal.fire({
+        title: 'Hapus Pemasukan?',
+        text: `Hapus pembayaran dari ${row.nama_siswa}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Ya, Hapus!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const { error } = await supabase.from('pemasukan').delete().eq('id', row.id);
+          if (!error) {
+            Swal.fire({ icon: 'success', title: 'Terhapus!', confirmButtonColor: '#0f766e' });
+            loadData();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+          }
+        }
+      });
+    }
+
+    async function openEditPengeluaran(index) {
+      const row = globalPengeluaranList[index];
+      if (!row) return;
+
+      Swal.fire({
+        title: 'Edit Pengeluaran',
+        html: `
+          <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Tanggal</label><input type="date" id="swalEditOutTanggal" value="${row.tanggal}" class="swal2-input" style="margin: 0; width: 100%;"></div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Keterangan</label><textarea id="swalEditOutKeterangan" class="swal2-textarea" style="margin: 0; width: 100%; height: 80px;">${row.keterangan}</textarea></div>
+            <div><label style="font-size: 14px; font-weight: 700; color: #475569; display:block; margin-bottom:4px;">Nominal (Rp)</label><input type="number" id="swalEditOutNominal" value="${row.nominal}" class="swal2-input" style="margin: 0; width: 100%;"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan Perubahan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#0f766e',
+        focusConfirm: false,
+        preConfirm: () => ({
+          tanggal: document.getElementById('swalEditOutTanggal').value,
+          keterangan: document.getElementById('swalEditOutKeterangan').value,
+          nominal: Number(document.getElementById('swalEditOutNominal').value)
+        })
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const { error } = await supabase.from('pengeluaran').update(result.value).eq('id', row.id);
+          if (!error) {
+            Swal.fire({ icon: 'success', title: 'Berhasil!', confirmButtonColor: '#0f766e' });
+            loadData();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+          }
+        }
+      });
+    }
+
+    async function deletePengeluaran(index) {
+      const row = globalPengeluaranList[index];
+      if (!row) return;
+
+      Swal.fire({
+        title: 'Hapus Pengeluaran?',
+        text: `Hapus "${row.keterangan}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Ya, Hapus!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const { error } = await supabase.from('pengeluaran').delete().eq('id', row.id);
+          if (!error) {
+            Swal.fire({ icon: 'success', title: 'Terhapus!', confirmButtonColor: '#0f766e' });
+            loadData();
+          } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message, confirmButtonColor: '#0f766e' });
+          }
+        }
+      });
+    }
+
+    function cetakRingkasan() {
+      const elPeriode = document.getElementById('section-laporan-periode');
+      elPeriode.style.display = 'none';
+      setTimeout(() => { window.print(); setTimeout(() => { elPeriode.style.display = ''; }, 500); }, 100);
+    }
+
+    function cetakPeriode() {
+      const elRingkasan = document.getElementById('section-laporan-ringkasan');
+      elRingkasan.style.display = 'none';
+      setTimeout(() => { window.print(); setTimeout(() => { elRingkasan.style.display = ''; }, 500); }, 100);
+    }
+
+    function toggleSelectAll(btn) {
+      const checkboxes = document.querySelectorAll('input[name="pilihSiswa"]');
+      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+      checkboxes.forEach(cb => cb.checked = !allChecked);
+      btn.innerText = allChecked ? 'Pilih Semua' : 'Batal Pilih';
+    }
+
+    function switchTab(el, tabId) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function toggleModalPemasukan(show) {
+      const modal = document.getElementById('inputModal');
+      if (show) {
+        modal.classList.add('active');
+        document.getElementById('inTanggal').valueAsDate = new Date();
+        generatePeriodeOptions();
+      } else {
+        modal.classList.remove('active');
+        document.getElementById('groupNominalManual').style.display = 'none';
+        document.getElementById('selectNominal').value = '5000';
+      }
+    }
+
+    function toggleModalPengeluaran(show) {
+      const modal = document.getElementById('inputModalPengeluaran');
+      if (show) {
+        modal.classList.add('active');
+        document.getElementById('outTanggal').valueAsDate = new Date();
+      } else {
+        modal.classList.remove('active');
+      }
+    }
+
+    function toggleModalSiswa(show) {
+      const modal = document.getElementById('inputModalSiswa');
+      if (show) {
+        modal.classList.add('active');
+        document.getElementById('siswaNo').value = globalSiswaList.length + 1;
+      } else {
+        modal.classList.remove('active');
+      }
+    }
+
+    function downloadTemplateCSV() {
+      const csvContent = "Tanggal,Nama Siswa,Periode,Minggu Ke,Nominal\n2026-07-01,Contoh Nama Siswa,Juli 2026,1,5000";
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'template_pemasukan_kas.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function triggerImportCSV() {
+      let input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.csv, text/csv';
+      input.onchange = e => {
+        let file = e.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = async function(evt) {
+          let lines = evt.target.result.split('\n');
+          let records = [];
+          for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            let cols = line.split(',');
+            if (cols.length >= 5) {
+              records.push({
+                tanggal: cols[0].trim(),
+                nama_siswa: cols[1].trim(),
+                periode: cols[2].trim(),
+                minggu_ke: Number(cols[3].trim()),
+                nominal: Number(cols[4].trim())
+              });
+            }
+          }
+          if (records.length > 0) {
+            const { error } = await supabase.from('pemasukan').insert(records);
+            if (!error) {
+              Swal.fire({ icon: 'success', title: 'Berhasil Import!', confirmButtonColor: '#0f766e' });
+              loadData();
+            } else {
+              Swal.fire({ icon: 'error', title: 'Gagal Import', text: error.message, confirmButtonColor: '#0f766e' });
+            }
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+  </script>
+</body>
+</html>
