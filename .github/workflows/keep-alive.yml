@@ -1,0 +1,14 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request Supabase API
+        run: |
+          curl -X GET "https://tffihlopqgduzybxdilk.supabase.co/rest/v1/" \
+          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmZmlobG9wcWdkdXp5YnhkaWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMTY4NDYsImV4cCI6MjEwMzc5Mjg0Nn0.XBuJ-K18_yNxipD5MfnxRUu0tHsqPj_3X67BwvKRZ3Y"
