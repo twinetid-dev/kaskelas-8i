@@ -500,9 +500,8 @@
     const SUPABASE_URL = 'https://tffihlopqgduzybxdilk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmZmlobG9wcWdkdXp5YnhkaWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMTY4NDYsImV4cCI6MjEwMzc5Mjg0Nn0.XBuJ-K18_yNxipD5MfnxRUu0tHsqPj_3X67BwvKRZ3Y';
     
-    // Inisialisasi Supabase secara global dan aman dari duplikasi deklarasi
-    window.supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const supabase = window.supabaseClient;
+    // Inisialisasi menggunakan variabel 'db' untuk menghindari error redeklarasi
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let globalSiswaList = [];
     let globalPemasukanList = [];
@@ -589,7 +588,7 @@
       err.style.display = 'none';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('users')
           .select('*')
           .eq('username', u)
@@ -630,15 +629,15 @@
 
       try {
         // Fetch Siswa
-        const { data: siswaData } = await supabase.from('siswa').select('*').order('no', { ascending: true });
+        const { data: siswaData } = await db.from('siswa').select('*').order('no', { ascending: true });
         globalSiswaList = siswaData || [];
 
         // Fetch Pemasukan
-        const { data: pemasukanData } = await supabase.from('pemasukan').select('*').order('tanggal', { ascending: false });
+        const { data: pemasukanData } = await db.from('pemasukan').select('*').order('tanggal', { ascending: false });
         globalPemasukanList = pemasukanData || [];
 
         // Fetch Pengeluaran
-        const { data: pengeluaranData } = await supabase.from('pengeluaran').select('*').order('tanggal', { ascending: false });
+        const { data: pengeluaranData } = await db.from('pengeluaran').select('*').order('tanggal', { ascending: false });
         globalPengeluaranList = pengeluaranData || [];
 
         // Kalkulasi Total
@@ -797,7 +796,7 @@
         nominal: Number(finalNominal)
       }));
 
-      const { error } = await supabase.from('pemasukan').insert(insertData);
+      const { error } = await db.from('pemasukan').insert(insertData);
 
       btn.innerText = 'Simpan Semua';
       btn.disabled = false;
@@ -821,7 +820,7 @@
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
 
-      const { error } = await supabase.from('pengeluaran').insert([{ tanggal, keterangan, nominal: Number(nominal) }]);
+      const { error } = await db.from('pengeluaran').insert([{ tanggal, keterangan, nominal: Number(nominal) }]);
 
       btn.innerText = 'Simpan Pengeluaran';
       btn.disabled = false;
@@ -845,7 +844,7 @@
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
 
-      const { error } = await supabase.from('siswa').insert([{ no: Number(no), nama_siswa, l_p }]);
+      const { error } = await db.from('siswa').insert([{ no: Number(no), nama_siswa, l_p }]);
 
       btn.innerText = 'Simpan Siswa';
       btn.disabled = false;
@@ -894,7 +893,7 @@
         })
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const { error } = await supabase.from('pemasukan').update(result.value).eq('id', row.id);
+          const { error } = await db.from('pemasukan').update(result.value).eq('id', row.id);
           if (!error) {
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Data diperbarui!', confirmButtonColor: '#0f766e' });
             loadData();
@@ -918,7 +917,7 @@
         confirmButtonText: 'Ya, Hapus!'
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const { error } = await supabase.from('pemasukan').delete().eq('id', row.id);
+          const { error } = await db.from('pemasukan').delete().eq('id', row.id);
           if (!error) {
             Swal.fire({ icon: 'success', title: 'Terhapus!', confirmButtonColor: '#0f766e' });
             loadData();
@@ -954,7 +953,7 @@
         })
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const { error } = await supabase.from('pengeluaran').update(result.value).eq('id', row.id);
+          const { error } = await db.from('pengeluaran').update(result.value).eq('id', row.id);
           if (!error) {
             Swal.fire({ icon: 'success', title: 'Berhasil!', confirmButtonColor: '#0f766e' });
             loadData();
@@ -978,7 +977,7 @@
         confirmButtonText: 'Ya, Hapus!'
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const { error } = await supabase.from('pengeluaran').delete().eq('id', row.id);
+          const { error } = await db.from('pengeluaran').delete().eq('id', row.id);
           if (!error) {
             Swal.fire({ icon: 'success', title: 'Terhapus!', confirmButtonColor: '#0f766e' });
             loadData();
@@ -1086,7 +1085,7 @@
             }
           }
           if (records.length > 0) {
-            const { error } = await supabase.from('pemasukan').insert(records);
+            const { error } = await db.from('pemasukan').insert(records);
             if (!error) {
               Swal.fire({ icon: 'success', title: 'Berhasil Import!', confirmButtonColor: '#0f766e' });
               loadData();
