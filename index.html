@@ -150,6 +150,7 @@
       table { font-size: 14px !important; }
       th { background: #f1f5f9 !important; color: #000 !important; border-bottom: 2px solid #cbd5e1 !important; }
       td { border-bottom: 1px solid #e2e8f0 !important; }
+      #printPeriodeInfo { display: block !important; }
     }
   </style>
 </head>
@@ -317,7 +318,7 @@
                 <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Laporan Keuangan Kas</h3>
                 <p style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Ringkasan keseluruhan kas kelas.</p>
               </div>
-              <button class="btn btn-sm btn-outline no-print" onclick="cetakRingkasan()">Cetak</button>
+              <button class="btn btn-sm btn-outline no-print" onclick="cetakRingkasan()">Download PDF</button>
             </div>
             <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 8px 0;">
             <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
@@ -348,10 +349,13 @@
                 <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Laporan Kas per Periode</h3>
                 <p style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Cek status pembayaran siswa.</p>
               </div>
-              <button class="btn btn-sm btn-outline no-print" onclick="cetakPeriode()">Cetak</button>
+              <button class="btn btn-sm btn-outline no-print" onclick="cetakPeriode()">Download PDF</button>
             </div>
             <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 2px 0;">
             
+            <!-- Informasi Periode yang aktif saat cetak/PDF -->
+            <div id="printPeriodeInfo" style="display: none; font-weight: 700; font-size: 16px; color: #0f766e; margin-bottom: 2px;"></div>
+
             <div style="display: flex; gap: 12px;" class="no-print">
               <div class="form-group" style="flex: 2; margin-bottom: 0;">
                 <label>Pilih Periode</label>
@@ -995,9 +999,19 @@
     }
 
     function cetakPeriode() {
+      const periodeVal = document.getElementById('filterPeriode').value;
+      const mingguVal = document.getElementById('filterMinggu').value;
+      document.getElementById('printPeriodeInfo').innerText = `Periode Dipilih: ${periodeVal} - Minggu ${mingguVal}`;
+
       const elRingkasan = document.getElementById('section-laporan-ringkasan');
       elRingkasan.style.display = 'none';
-      setTimeout(() => { window.print(); setTimeout(() => { elRingkasan.style.display = ''; }, 500); }, 100);
+      setTimeout(() => { 
+        window.print(); 
+        setTimeout(() => { 
+          elRingkasan.style.display = ''; 
+          document.getElementById('printPeriodeInfo').style.display = 'none';
+        }, 500); 
+      }, 100);
     }
 
     function toggleSelectAll(btn) {
